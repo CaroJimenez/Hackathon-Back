@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import utez.edu.mx.hackathon_back.model.currency.Currency;
 
 import javax.persistence.*;
 
@@ -18,21 +17,14 @@ public class PaymentCash {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @ManyToOne
-    @JoinColumn(name = "currency")
-    private Currency currency;
     @Column(nullable = false)
     private String amount;
-    @Column(nullable = true)
-    private String description;
-    @Column(nullable = false)
-    private String reference_id;
     @Column(nullable = false)
     private String customer_name;
     @Column(nullable = false)
     private String customer_email;
     @Column(nullable = false)
     private String customer_phone;
-
-
+    @Column(nullable = false)
+    private Integer status; //0 pending - 1 done - 2 cancelled
 }

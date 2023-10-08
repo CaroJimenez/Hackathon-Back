@@ -13,6 +13,8 @@ import utez.edu.mx.hackathon_back.model.conekta.paymentCash.PaymentCash;
 import utez.edu.mx.hackathon_back.model.conekta.paymentCash.PaymentCashRepository;
 import utez.edu.mx.hackathon_back.model.conekta.tickeyOxxo.TicketOxxo;
 
+import java.util.List;
+
 
 @Service
 @Transactional
@@ -37,18 +39,28 @@ public class PaymentCashService {
                     .join();
             client.close();
 
+            PaymentCash paymentCashInsert = new PaymentCash();
+            paymentCashInsert.setAmount(paymentCash.getAmount());
+            paymentCashInsert.setCustomer_name(paymentCash.getCustomer_name());
+            paymentCashInsert.setCustomer_email(paymentCash.getCustomer_email());
+            paymentCashInsert.setCustomer_phone(paymentCash.getCustomer_phone());
+            paymentCashInsert.setStatus(0); //pending
+            this.repository.save(paymentCashInsert);
+
             ObjectMapper objectMapper = new ObjectMapper();
             JsonNode jsonNode = objectMapper.readTree(response.getResponseBody());
             String barcode_url = jsonNode.at("/charges/data/0/payment_method/barcode_url").asText();
             String reference = jsonNode.at("/charges/data/0/payment_method/reference").asText();
             Integer expires_at = jsonNode.at("/charges/data/0/payment_method/expires_at").asInt();
             Integer created_at = jsonNode.at("/charges/data/0/created_at").asInt();
+            String store_name = jsonNode.at("/charges/data/0/payment_method/store_name").asText();
 
             TicketOxxo ticketOxxo = new TicketOxxo();
             ticketOxxo.setBarcode_url(barcode_url);
             ticketOxxo.setReference(reference);
             ticketOxxo.setExpires_at(expires_at);
             ticketOxxo.setCreated_at(created_at);
+            ticketOxxo.setStore_name(store_name);
 
             return new utez.edu.mx.hackathon_back.utils.Response<>(
                     ticketOxxo,
@@ -60,5 +72,15 @@ public class PaymentCashService {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Transactional(readOnly = true)
+    public utez.edu.mx.hackathon_back.utils.Response<List<PaymentCash>> getAll(){
+        return new utez.edu.mx.hackathon_back.utils.Response<>(
+                this.repository.findAll(),
+                false,
+                200,
+                "OK"
+        );
     }
 }
